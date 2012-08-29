@@ -33,6 +33,8 @@
 #include "RealmList.h"
 #include "RealmAcceptor.h"
 
+#include "Patcher.h"
+
 #ifndef _TRINITY_REALM_CONFIG
 # define _TRINITY_REALM_CONFIG  "authserver.conf"
 #endif
@@ -43,6 +45,8 @@ void StopDB();
 bool stopEvent = false;                                     // Setting it to true stops the server
 
 LoginDatabaseWorkerPool LoginDatabase;                      // Accessor to the auth server database
+
+extern Patcher patcher;
 
 // Handle authserver's termination signals
 class AuthServerSignalHandler : public Trinity::SignalHandler
@@ -100,6 +104,7 @@ extern int main(int argc, char **argv)
     sLog->outInfo(LOG_FILTER_AUTHSERVER, "%s (authserver)", _FULLVERSION);
     sLog->outInfo(LOG_FILTER_AUTHSERVER, "<Ctrl-C> to stop.\n");
     sLog->outInfo(LOG_FILTER_AUTHSERVER, "Using configuration file %s.", cfg_file);
+    patcher.Initialize();
 
     sLog->outWarn(LOG_FILTER_AUTHSERVER, "%s (Library: %s)", OPENSSL_VERSION_TEXT, SSLeay_version(SSLEAY_VERSION));
 

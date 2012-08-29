@@ -23,6 +23,9 @@
 #include "BigNumber.h"
 #include "RealmSocket.h"
 
+#include "../Patcher.h"
+#include <openssl/md5.h>
+
 // Handle login commands
 class AuthSocket: public RealmSocket::Session
 {
@@ -52,9 +55,11 @@ public:
     FILE* pPatch;
     ACE_Thread_Mutex patcherLock;
 
+    PatcherRunnable *_patcher;
+    RealmSocket& socket(void) { return socket_; }
+
 private:
     RealmSocket& socket_;
-    RealmSocket& socket(void) { return socket_; }
 
     BigNumber N, s, g, v;
     BigNumber b, B;
