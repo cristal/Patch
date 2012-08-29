@@ -1260,6 +1260,7 @@ void AddBattlegroundScripts()
 /* This is where custom scripts' loading functions should be declared. */
 
 void AddSC_NPC_Transmogrify();
+void AddSC_system_phase();
 #endif
 
 void AddCustomScripts()
@@ -1268,5 +1269,6 @@ void AddCustomScripts()
     /* This is where custom scripts should be added. */
 
     AddSC_NPC_Transmogrify();
+	AddSC_system_phase();
 #endif
 }
