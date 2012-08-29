@@ -1840,7 +1840,9 @@ Rate.Drop.Item.ReferencedAmount = 1
 #    Rate.XP.Kill
 #    Rate.XP.Quest
 #    Rate.XP.Explore
-#        Description: Experience rates.
+#    Rate.XP.Weekend.EVID
+#        Description: Experience rates. Weekend rate actives every Saturday and Sunday.
+#                     Weekend.EVID is the EVENT ID in the `game_events` table to use.
 #        Default:     1 - (Rate.XP.Kill)
 #                     1 - (Rate.XP.Quest)
 #                     1 - (Rate.XP.Explore)
@@ -1858,6 +1860,8 @@ Rate.XP.Kill.Premium    = 2
 Rate.XP.Quest.Premium   = 2
 Rate.XP.Explore.Premium = 2
 Rate.Honor.Premium = 2
+Rate.XP.Weekend = 1.5
+Rate.XP.Weekend.EVID = 65
 
 #
 #    Rate.RepairCost

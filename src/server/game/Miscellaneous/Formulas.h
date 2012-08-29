@@ -19,6 +19,7 @@
 #ifndef TRINITY_FORMULAS_H
 #define TRINITY_FORMULAS_H
 
+#include "GameEventMgr.h"
 #include "World.h"
 #include "SharedDefines.h"
 #include "ScriptMgr.h"
@@ -180,7 +181,7 @@ namespace Trinity
 
                     float premium_rate = player->GetSession()->IsPremium() ? sWorld->getRate(RATE_XP_KILL_PREMIUM) : 1.0f;
 
-            return uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate);
+            return uint32(gain*sWorld->getRate(RATE_XP_KILL)*premium_rate * (IsEventActive(sWorld->getIntConfig(CONFIG_RATE_XP_WEEKEND_EVID)) ? sWorld->getRate(RATE_XP_WEEKEND) : 1.0f));
             }
 
             sScriptMgr->OnGainCalculation(gain, player, u);
