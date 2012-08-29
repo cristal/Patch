@@ -10,6 +10,8 @@
 
 set(scripts_STAT_SRCS
   ${scripts_STAT_SRCS}
+    Custom/Transmogrification.cpp
+    Custom/Transmogrification.h
 )
 
 message("  -> Prepared: Custom")
