@@ -71,6 +71,7 @@
 #include "CharacterDatabaseCleaner.h"
 #include "ScriptMgr.h"
 #include "WeatherMgr.h"
+#include "AuctionHouseBot.h"
 #include "CreatureTextMgr.h"
 #include "SmartAI.h"
 #include "Channel.h"
@@ -1761,6 +1762,9 @@ void World::SetInitialWorldSettings()
 
     LoadCharacterNameData();
 
+    sLog->outInfo(LOG_FILTER_SERVER_LOADING, "Initialize AuctionHouseBot...");
+    auctionbot.Initialize();
+
     uint32 startupDuration = GetMSTimeDiffToNow(startupBegin);
 
     sLog->outInfo(LOG_FILTER_WORLDSERVER, "World initialized in %u minutes %u seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
@@ -1917,6 +1921,7 @@ void World::Update(uint32 diff)
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
     {
+        auctionbot.Update();
         m_timers[WUPDATE_AUCTIONS].Reset();
 
         ///- Update mails (return old mails with item, or delete them)
