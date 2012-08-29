@@ -51,6 +51,7 @@
 #include "Guild.h"
 #include "Pet.h"
 #include "Util.h"
+#include "Jail.h"
 #include "Transport.h"
 #include "Weather.h"
 #include "Battleground.h"
@@ -690,6 +691,15 @@ Player::Player(WorldSession* session): Unit(true), m_achievementMgr(this), m_rep
 
     m_social = NULL;
 
+    // Jail by WarHead
+    m_JailRelease = 0;                      // Release Time
+    m_NumberJailed = 0;                     // Number of visits Jail
+    m_JailGMAcc = 0;                        // GM has dented his account of the..?
+    m_JailDuration = 0;                     // Duration of stay abroad Jail
+    m_JailBans = 0;                         // Number of ban by the Jail
+    m_JailWarnTimer = 20*IN_MILLISECONDS;   // Timer so that the warnings from Jail WHILE not a loading screen to send!
+    m_Jailed = false;                       // At present, especially in Jail?
+
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
     m_groupUpdateMask = 0;
@@ -1198,6 +1208,50 @@ bool Player::Create(uint32 guidlow, CharacterCreateInfo* createInfo)
     return true;
 }
 
+// Jail Data Load
+void Player::JailDataLoad()
+{
+    JailMap const & jailMap = sJail->HoleJailMap();
+    JailMap::const_iterator itr = jailMap.find(GetGUIDLow());
+    if (itr == jailMap.end())
+        return;
+
+    if (itr->second.Release) // Release time is available, ie from the jail!
+        m_Jailed = true;
+
+    m_JailRelease = itr->second.Release;
+    m_JailReason = itr->second.Reason;
+    m_NumberJailed = itr->second.Times;
+    m_JailGMAcc = itr->second.GMAcc;
+    m_JailGMChar = itr->second.GMChar;
+    m_JailTime = itr->second.Time;
+    m_JailDuration = itr->second.Duration;
+    m_JailBans = itr->second.BTimes;
+
+    sJail->Control(this);
+}
+
+// Jail Data Save
+void Player::JailDataSave()
+{
+    CharacterDatabase.PExecute("REPLACE INTO `jail` (`guid`,`char`,`release`,`reason`,`times`,`gmacc`,`gmchar`,`lasttime`,`duration`,`btimes`) VALUES (%u,'%s',%u,'%s',%u,%u,'%s',%u,%u,%u)",
+        GetGUIDLow(), GetName(), m_JailRelease, m_JailReason.c_str(), m_NumberJailed, m_JailGMAcc, m_JailGMChar.c_str(), m_JailTime, m_JailDuration, m_JailBans);
+
+    JailEntryStructure JES;
+
+    JES.CharName    = GetName();
+    JES.Release     = m_JailRelease;
+    JES.Reason      = m_JailReason;
+    JES.Times       = m_NumberJailed;
+    JES.GMAcc       = m_JailGMAcc;
+    JES.GMChar      = m_JailGMChar;
+    JES.Time        = m_JailTime;
+    JES.Duration    = m_JailDuration;
+    JES.BTimes      = m_JailBans;
+
+    sJail->UpdateJailMap(GetGUIDLow(), JES);
+}
+
 bool Player::StoreNewItemInBestSlots(uint32 titem_id, uint32 titem_amount)
 {
     sLog->outDebug(LOG_FILTER_PLAYER_ITEMS, "STORAGE: Creating initial item, itemId = %u, count = %u", titem_id, titem_amount);
@@ -1519,6 +1573,19 @@ void Player::Update(uint32 p_time)
     if (!IsInWorld())
         return;
 
+    // Timer so that the warnings from Jail WHILE not a loading screen to send!
+    if (m_JailWarnTimer && m_JailWarnTimer <= p_time)
+    {
+        sJail->SendWarning(this);
+        m_JailWarnTimer = 0;
+    }
+    else
+        m_JailWarnTimer -= p_time;
+
+    // Jail Control
+    if (m_Jailed)
+        sJail->Control(this, true);
+
     // undelivered mail
     if (m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
     {
@@ -1725,7 +1792,15 @@ void Player::Update(uint32 p_time)
     }
 
     if (m_deathState == JUST_DIED)
-        KillPlayer();
+      {   // Jail not let inmate die (eg from other users / NPCs, etc.)
+        if (!m_Jailed)
+            KillPlayer();
+        else
+        {
+            m_deathState = ALIVE;
+            RegenerateAll();
+        }
+    }
 
     if (m_nextSave > 0)
     {
@@ -4911,6 +4986,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_PET_DECLINEDNAME_BY_OWNER);
             stmt->setUInt32(0, guid);
             trans->Append(stmt);
+
+            trans->PAppend("DELETE FROM jail WHERE guid = '%u'", guid); // Jail by WarHead
 
             stmt = CharacterDatabase.GetPreparedStatement(CHAR_DEL_CHAR_ACHIEVEMENTS);
             stmt->setUInt32(0, guid);
@@ -17325,6 +17402,9 @@ bool Player::LoadFromDB(uint32 guid, SQLQueryHolder *holder)
 
     _LoadEquipmentSets(holder->GetPreparedResult(PLAYER_LOGIN_QUERY_LOADEQUIPMENTSETS));
 
+    // Jail by WarHead
+    JailDataLoad();
+
     return true;
 }
 
@@ -18874,7 +18954,13 @@ void Player::SaveToDB(bool create /*=false*/)
     // check if stats should only be saved on logout
     // save stats can be out of transaction
     if (m_session->isLogingOut() || !sWorld->getBoolConfig(CONFIG_STATS_SAVE_ONLY_ON_LOGOUT))
-        _SaveStats(trans);
+       {
+        // Jail Data Save
+        if (m_Jailed)
+            JailDataSave();
+
+         _SaveStats(trans);
+    }
 
     CharacterDatabase.CommitTransaction(trans);
 

@@ -26,6 +26,7 @@ set(scripts_STAT_SRCS
   Commands/cs_guild.cpp
   Commands/cs_honor.cpp
   Commands/cs_instance.cpp
+  Commands/cs_jail.cpp
   Commands/cs_learn.cpp
   Commands/cs_list.cpp
   Commands/cs_lookup.cpp

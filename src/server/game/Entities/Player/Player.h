@@ -1161,6 +1161,23 @@ class Player : public Unit, public GridObject<Player>
 
         void InitStatsForLevel(bool reapplyMods = false);
 
+        // Jail by WarHead
+        uint32 m_JailRelease;       // Release Time
+        uint32 m_NumberJailed;      // Number of visits Jail
+        uint32 m_JailGMAcc;         // GM has dented his account of the ...?
+        uint32 m_JailDuration;      // Duration of stay abroad Jail
+        uint32 m_JailWarnTimer;     // Timer so that the warnings from Jail WHILE not a loading screen to send!
+        uint32 m_JailBans;          // Number of bans by the Jail
+        uint32 m_JailTime;          // Imprisonments Time
+
+        std::string m_JailReason;   // Reason
+        std::string m_JailGMChar;   // Jailing GM
+
+        bool m_Jailed;              // At present, especially in Jail?
+
+        void JailDataLoad();
+        void JailDataSave();
+
         // Played Time Stuff
         time_t m_logintime;
         time_t m_Last_tick;
