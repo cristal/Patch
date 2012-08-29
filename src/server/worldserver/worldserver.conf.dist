@@ -2929,6 +2929,13 @@ PlayerDump.DisallowPaths = 1
 
 PlayerDump.DisallowOverwrite = 1
 
+#    Armory.Enable
+#        Description: Activates the WowArmory.
+#        Default:     0 - (Disable)
+#                     1 - (Enable)
+
+Armory.Enable = 1
+
 #
 ###################################################################################################
 
