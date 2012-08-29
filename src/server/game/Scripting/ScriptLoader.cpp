@@ -1261,6 +1261,7 @@ void AddBattlegroundScripts()
 
 void AddSC_NPC_Transmogrify();
 void AddSC_system_phase();
+void AddSC_GuildHouse();
 #endif
 
 void AddCustomScripts()
@@ -1270,5 +1271,6 @@ void AddCustomScripts()
 
     AddSC_NPC_Transmogrify();
 	AddSC_system_phase();
+	AddSC_GuildHouse();
 #endif
 }

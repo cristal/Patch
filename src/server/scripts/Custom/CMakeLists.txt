@@ -13,6 +13,7 @@ set(scripts_STAT_SRCS
     Custom/Transmogrification.cpp
     Custom/Transmogrification.h
     Custom/Phase.cpp
+    Custom/GuildHouse.cpp
 )
 
 message("  -> Prepared: Custom")
